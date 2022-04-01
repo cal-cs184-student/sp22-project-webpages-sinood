@@ -1,7 +1,186 @@
-<html>
-	<head>
-	</head>
-	<body>
-		Project 3-2 here
-	</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+<style>  
+    div.padded {  
+      padding-top: 0px;  
+      padding-right: 100px;  
+      padding-bottom: 0.25in;  
+      padding-left: 100px;  
+    }  
+    h1, h2 {
+        font-family: 'Source Sans Pro', sans-serif;
+}
+    }
+    table, th, td{
+        border: 2px solid;
+    }
+  </style> 
+<title>Yassin Oulad Daoud  |  CS 184</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+</head>
+<body>
+<br />
+<h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2022</h1>
+<h1 align="middle">Project 3-2: PathTracer 2</h1>
+<h2 align="middle">Yassin Oulad Daoud, CS 184</h2>
+
+    <div class="padded">
+
+    <h2 align="middle">Part 2: Microfacet Material</h2>
+        <p>In this part, I implemented a Microfacet BRDF model with importance sampling to render materials that are only reflective and have specific reflection and roughness attributes, i.e. metals,  plastics and other opaque materials.</p>
+        
+        <h3>Roughness value</h3>
+        
+        <p> Unlike with Diffuse BRDFs that used hemisphere sapmling modeled in Part 1 of the project, the Microfacet BRDF produces a more glossy look that reflects light coming from surrounding objects. Additionally we don't sample rays from a hit point in the scene across a uniform hemisphere as in diffuse material modeling in Project 3-1; rather, we importance sample according to a Beckmann NDF. This new distribution function depends on the roughness value alpha of the material, allowing us to render objects to look more reflective (lower alpha or roughness), or more diffuse (higher alpha).</p>
+        <p>The images below show how we can vary the alpha for a single material (in this case, gold) to go from very glossy to more diffuse reflection. I used 128 samples per pixel and 1 sample per light source with 5 bounces, while varying the alpha between 0.005, 0.05, 0.25 and 0.5:</p>
+        
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/s21.png" width="480px" />
+                    <figcaption align="middle">CBdragon_microfacet_au.dae with alpha = 0.005<br>(64 samples/pixel, 1 sample/light, 480x360)</figcaption>
+                    </td>
+                        <td align="middle">
+                    <img src="images/s22.png" width="480px"/>
+                            <figcaption align="middle">CBdragon_microfacet_au.dae with alpha = 0.05<br>(64 samples/pixel, 1 sample/light, 480x360)</figcaption></td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                    <img src="images/s23.png" width="480px" />
+                    <figcaption align="middle">CBdragon_microfacet_au.dae with alpha = 0.25<br>(64 samples/pixel, 1 sample/light, 480x360)</figcaption>
+                    </td>
+                        <td align="middle">
+                    <img src="images/s24.png" width="480px" />
+                            <figcaption align="middle">CBdragon_microfacet_au.dae with alpha = 0.5<br>(64 samples/pixel, 1 sample/light, 480x360)</figcaption></td>
+                </tr>
+            </table>
+        </div>
+        
+        <p>In the images above, the lower alpha values produce a very glossy dragon while the higher alphas produce one that reflects light more smoothly. </p>
+        
+        <h3>Importance sampling</h3>
+        <p>The importance sampling used in this part randomly samples a new surface normal vector h which is close to the material's surface normal n according to a Beckmann NDF. Then the flected vector wi is computed as the vector reflection of the incoming camera ray wo across from the sampled h. This yields a much better model of reflection than our previous uniform hemisphere sampling, which simply sampled wi directly in any direction out from the hit point on the surface, since we are computing wi as a reflection of the incoming ray wo. The precision of this reflection is modeled by our roughness value alpha, which partly determines how close our computed normal vector h is to the surface normal n. A lower alpha means a more reflective/glossy surface whereas a higher alpha means a more diffuse/rough surface.</p>
+        
+        <p>Below I show the difference between sampling over a uniform hemisphere as in Project 3-1 and sampling with the importance sampling implemented here. Both objects still use the Microfacet BRDF to achieve a reflective look, yet sample rays according to different distribution functions:</p>
+        
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/s25.png" width="480px" />
+                    <figcaption align="middle">CBbunnny_microfacet_cu.dae with hemisphere sampling<br>(64 samples/pixel, 1 sample/light, 480x360)</figcaption>
+                    </td>
+                        <td align="middle">
+                    <img src="images/s26.png" width="480px"/>
+                            <figcaption align="middle">CBbunnny_microfacet_cu.dae with importance sampling<br>(64 samples/pixel, 1 sample/light, 480x360)</figcaption></td>
+                </tr>
+               
+            </table>
+        </div>
+        <p>In the left image, the bounce rays are sampled uniformly over a hemisphere, leading to a larger number of rays being traced to the dark opening of the Cornell box and thus the bunny appears much darker. In the importance sampling, the bounce rays are reflected across our sampled normal vector h as described above. This achieves a more accurate reflective appearance overall.</p>
+        
+        <h3>Modeling different materials</h3>
+        <p>The Microfacet BRDF includes a Fresnel term that affects the radiance value of the material according to refraction indices eta and K. These indices are specific to different materials and are different for each wavelength in the light spectrum. In our model, we compute the Fresnel term for just the three wavelengths corresponding to the r, g, and b of each pixel (614 nm, 549 nm, and 466 nm respectively).</p>
+        <p>In the images below, I render the dragon with the eta and K values for gold and mercury while keeping all other settings the same:</p>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/s23.png" width="480px" />
+                    <figcaption align="middle">CBdragon_microfacet_au.dae with gold eta and K values<br>(64 samples/pixel, 1 sample/light, 480x360)</figcaption>
+                    </td>
+                        <td align="middle">
+                    <img src="images/s27.png" width="480px"/>
+                            <figcaption align="middle">CBdragon_microfacet_hg.dae with mercury eta and K values<br>(64 samples/pixel, 1 sample/light, 480x360)</figcaption></td>
+                </tr>
+               
+            </table>
+        </div>
+        <p>In the images above, using different eta and K values changes how the Microfacet BRDF alters the r, g, and b values of the radiance computed at the surface points of the dragon. The mercury indices produce generally more silvery colors than the default gold dragon. </p>
+        
+         <h2 align="middle">Part 4: Depth of Field</h2>
+        <p>In this part, I implemented a new function to generate rays to model a "thin" camera lens with an adjustable aperture and depth of field. This allows us to render our scene with different focusing effects.</p>
+        <p>In our old camera ray implementation, we trace a ray from straight a single origin point into the scene across an image plane. Because we use a single point, we are erally simulating a "pinhole" camera that renders everything in sharp focus. The lens model should simulate light rays entering not just from one point but across the area of a lens. To simulate this, we modify our model to randomly sample the origin point over a total lens area and trace the ray into the scene from there. </p>
+        <p>With the the lens model, everything except the objects at the specified focal distance should be blurred. The area that is not blured is at the focus point pFocus, which is the same point to which we trace our ray in the old pinhole camera model. To compute the ray from the camera lens then, we first trace the ray into the scene as in the pinhole model to get the intersection point pFocus. Then, after we sample the point on the lens plane pLens, we subtract that pLens from pFocus to get the new ray direction, and create a ray using the new direction and pLens as the origin (we must make sure these are converted from camera to world coordinates as in Project 3-1).</p>
+        
+        <h3>Varying depth of field</h3>
+        <p>The depth of field is the depth at which objects in the scene will appear in focus. Small depth of field will put closer objects in focus, while a larger one will put far away objects in focus. Below is a focus stack demonstrating our camera lens model using the same aperture but with 4 different depths of field: </p>
+        
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/s28.png" width="480px" />
+                    <figcaption align="middle">CBdragon_microfacet_au.dae with depth = -0.25 <br>(64 samples/pixel, 1 sample/light, 480x360)</figcaption>
+                    </td>
+                        <td align="middle">
+                    <img src="images/s29.png" width="480px"/>
+                            <figcaption align="middle">CBdragon_microfacet_au.dae with depth = 0.0<br>(64 samples/pixel, 1 sample/light, 480x360)</figcaption></td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                    <img src="images/s210.png" width="480px" />
+                    <figcaption align="middle">CBdragon_microfacet_au.dae with depth = 0.25 <br>(64 samples/pixel, 1 sample/light, 480x360)</figcaption>
+                    </td>
+                        <td align="middle">
+                    <img src="images/s211.png" width="480px" />
+                            <figcaption align="middle">CBdragon_microfacet_au.dae with depth = 0.5<br>(64 samples/pixel, 1 sample/light, 480x360)</figcaption></td>
+                </tr>
+            </table>
+        </div>
+        <p>In the first image, the front of the dragon is in focus while the rest is blurred, and subsequently the middle and tail of the dragon are in focus until in the last image the depth of field is too far and the entire dragon appears blurry.</p>
+        <h3>Varying lens radius (aperture)</h3>
+        <p>The aperture is the area over which our model samples camera rays before tracing them into the scene. Greater lens radius means the out of focus regions will be generally blurrier while smaller lens radius means the out of focus regions will be sharper (a lens radius of 0 is essentially the same as the pinhole camera).</p>
+        <p>Below are 4 images of the dragon scene set to the same depth of field but with different aperture sizes:</p>
+        
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/s216-0000001.png" width="480px" />
+                    <figcaption align="middle">CBdragon_microfacet_au.dae with lens radius = 0.000001<br>(64 samples/pixel, 1 sample/light, 480x360)</figcaption>
+                    </td>
+                        <td align="middle">
+                    <img src="images/s212-005.png" width="480px"/>
+                            <figcaption align="middle">CBdragon_microfacet_au.dae with lens radius = 0.05<br>(64 samples/pixel, 1 sample/light, 480x360)</figcaption></td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                    <img src="images/s213-025.png" width="480px" />
+                    <figcaption align="middle">CBdragon_microfacet_au.dae with with lens radius = 0.25<br>(64 samples/pixel, 1 sample/light, 480x360)</figcaption>
+                    </td>
+                        <td align="middle">
+                    <img src="images/s215-1.png" width="480px" />
+                            <figcaption align="middle">CBdragon_microfacet_au.dae with lens radius = 1.0<br>(64 samples/pixel, 1 sample/light, 480x360)</figcaption></td>
+                </tr>
+            </table>
+        </div>
+        
+        <p>In the first image above, the aperture is so small that the entire image is sharp (we have basically reproduced the pinhole camera model we were using before implementing the camera lens model). In the next image we get some blurring but by the bottom-left image with lens radius 0.25, we can clearly make out where the depth of field is. In the last image the aperture is so large that the regions outside the focus point are almost too blurry to make out.</p>
+        
+        <p>After Parts 2 and 4 implemented as described above, we can now render cool images such as the one below:</p>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/CBdragon_microfacet_bi_screenshot_4-1_16-7-27.png" width="720px" />
+                    <figcaption align="middle">Osmium (a bluish metal) dragon rendered with roughness alpha = 0.25, with lens radius 0.08 and depth of field -0.25.<br>(256 samples/pixel, 4 samples/light, 960x720)</figcaption>
+                    </td>
+                </tr>
+               
+            </table>
+        </div>
+        
+    
+
+</div>
+</body>
 </html>
+
+
+
+

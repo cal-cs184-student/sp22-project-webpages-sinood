@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>
+  body {
+    padding: 100px;
+    width: 1000px;
+    margin: auto;
+    text-align: left;
+    font-weight: 300;
+    font-family: 'Open Sans', sans-serif;
+    color: #121212;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Source Sans Pro', sans-serif;
+  }
+</style>
+<title>CS 184 Final Project</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+</head>
+
+
+<body>
+
+<h2 align="middle">UC Berkeley</h2>
+<h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2022</h1>
+<h1 align="middle">Final Project: Realistic Fluid Simulation</h1>
+<h2 align="middle">Ashvin Dhawan, CS184</h2>
+<h2 align="middle">Jacob Jiang, CS184</h2>
+<h2 align="middle">Yassin Oulad Daoud, CS184</h2>
+<h2 align="middle">Ishil Puri, CS184</h2>
+
+<br><br>
+
+<div>
+
+<h1 align="middle">Project Proposal</h1>
+    <h2>Summary</h2>
+<p>For our final project, we plan to create an accurate particle based fluid simulation. Extending the concepts we learned from creating a spring-based cloth simulation, we plan to design a fluid model that mimics the properties fluids like water in various containers and scenarios.</p>
+    <h2>Problem Description</h2>
+    
+    
+    
+    <h2>Goals and Deliverables</h2>
+    
+    <h3>Research Questions</h3>
+    
+    <li>How do physical equations govern the movement of fluids?</li>
+    <li>How do these equations/properties change as the type of fluid changes?</li>
+    <li>What parameters differentiate different types of fluids?</li>
+    <li>How does co-interaction between particles and point masses change from solids like cloth to fluids?</li>
+    <li>How does light interact with moving particles?</li>
+    
+    <h3>Primary Goals</h3>
+
+    <p>Through this project, we hope to obtain an accurate simulation of various fluids in a variety of different scenes. More specifically, we aim to successfully perform the following tasks in order to call our project a success:</p>
+    <li>Successfully generate particles that mimic the physical properties of water, consistent with generally accepted physical equations and properties</li>
+    <li>Simulate the movement of water in various containers</li> 
+    <p>We will attempt to create simulations of moving water–whether starting as a falling body or as a resting body subject to a perturbation–in various different scenes. These scenes include, but are not limited to, water falling into a cube-like structure, water falling into a cup/pitcher, or a dam being released. We hope that this also challenges us to render surfaces that act as the basis for our simulations. For our team, a successful project would be to create at least two different scenes with accurate particle simulation and writing.</p>
+    
+    <h3>Stretch goals</h3>
+    
+    <p>If we are able to successfully achieve our primary goals, we aim to do the following:</p>
+    <li>Simulate large bodies of water, including the added characteristics that come with it such as undulations and perturbations</li>
+    <li>Achieve faster rendering using some sort of acceleration structure</li>
+    <p>We hope to extend our simulation to larger bodies of water, which has different properties as shown in the NVIDIA link provided in the Resources section. We also hope to accelerate our simulation renders if possible to get experience with various acceleration structures.</p>
+    
+    
+    <h3>Deliverables and Evaluation</h3>
+    <p>We plan to create multiple video demos and/or GIFs based on pre-computed simulations, hosted on YouTube and on our project webpage. In order to determine the success/quality of our simulations, we plan on comparing simple rendering scenarios with online videos to get a rough measure of accuracy. If we are able to reach our stretch goal of accelerating our simulation renders, we hope to include quantitative graphs demonstrating the speedup achieved.</p>
+    
+    
+    
+    <h2>Project Schedule</h2>
+    <p>With roughly 4 weeks to complete this project, we plan to break the tasks up in the following phases:</p>
+    <li>Phase 1 (Weeks 1-2): Developing the fluid dynamics system, working from the physics simulator in Project 4 and replacing the equations with those necessary for fluid simulation</li>
+    <li>Phase 2 (Week 3): Learning Blender, simulating and rendering the multiple containers </li>
+    <li>Phase 3 (Last week): Adjusting the fluid parameters and creating demos for the final presentation and writeup </li>
+    <p>The above schedule accounts for meeting our primary project goals. If the major work phases (1 and 2) go well, we can on our stretch goals in the third week before finally developing our demos and presentation.</p>
+    
+    
+    <h2>Resources</h2>
+    <p>For mathematical models and algorithms for position-based fluid simulation, <a href = "http://mmacklin.com/pbf_sig_preprint.pdf">"Position Based Fluids" by Macklin and Mueller</a></p>
+    <p>For different approaches and conceptual reference, these <a href = "http://www.cse.chalmers.se/edu/year/2018/course/TDA361/Advanced%20Computer%20Graphics/Position%20Based%20Fluids.pdf">lecture slides on position based fluids from the Chalmers University of Technology</a></p>
+    <p>For conceptual help and writeup structuring, this <a href="https://ctknight.github.io/FluidSimulator/">"FluidSimulator" project by former CS 284 students</a> and this <a href="https://ctknight.github.io/FluidSimulator/">3D Position Based Fluid Simulation project by former CS 184 students</a></p>
+    <p>For stretch goals: <a href = "https://developer.nvidia.com/gpugems/gpugems/part-i-natural-effects/chapter-1-effective-water-simulation-physical-models">Chapter from <i>GPU Gems</i> on rendering large bodies of water with Nvidia GPU</a>, as well as the student projects above</p>
+
+</body>
+</html>

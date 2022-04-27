@@ -35,6 +35,24 @@
 
 <div>
 
+<h1 align="middle">Milestone Report</h1>
+    <h2>Progess</h2>
+    <p>At this point in our fluid simulation project, we have set up our GUI with a "tank" filled with particles suspended in the air. At the moment, the particles fall to the floor of the tank and collapse on one another. We have much to do still in terms of implementing the Position Based Fluid simulation based on the paper by Macklin and Mueller, which will consist of adding loops to our algorithm to compute the particle density functions that determine the position of groups of particles in relation to one another. We decided to use a pre-made GUI as a starting point for our project, since our priary goal was really to implement the physics of the fluid simulation. For this reason, we are using the GUI and OpenCL framework from <a href="https://github.com/yaoius/f2">Dillon Yao's fluid simulator project</a>, which conveniently has a basic GUI set up for testing our physics simulation and encapsulates all of the physics functions in a separate .cl file. We are replacing the .cl file with our own, so that we can implement the physics on our own and then focus on meeting our stretch goals.</p>
+    <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/fluid-sim-milestone.gif" width="320px" />
+                    <figcaption align="middle">Current state of the fluid similator</figcaption>
+                </tr>
+            </table>
+        </div>
+    <p>This week, we first searched for various papers and academic articles to get a survey of different methods of fluid simulations. Some of the popular methods we encountered were the Boltzmann Equations, Navier-Stokes equations, Smoothed Particle Hydrodynamics, and Position-Based Fluid Dynamics. Each method was fairly unique and required a wholly different implementation, but certain implementations we found used multiple methods, such as combining Position-Based Fluid Dynamics with Smoothed Particle Hydrodynamics for pressure constraints. We also found various helpful slide decks and tutorials that will allow us to better understand the concrete computational implementations of the above methods.</p>
+    <h2>Updates to our initial plans</h2>
+    <p>In our initial proposal, we foresaw having to work more on the GUI; but now that we are working from the one made by Dillon we hope to make the physics implementation and some of our stretch goals, like implementing different shaders and simulating a lidui surface using a triangle mesh, the bulk of our project work. We have also decided to work with OpenCL to speed up our simulation, since this is a part of the structure of Dillon Yao's project that we are working from, and it will provide us a convenient way to implement our physics functions in a single .cl file (this will require us to become acquainted with this open-source GPU programming framework).</p>
+    <p></p>
+    <p>The following video summarizes our findings this week:</p>
+    
 <h1 align="middle">Project Proposal</h1>
     <h2>Summary</h2>
 <p>For our final project, we plan to create an accurate particle based fluid simulation. Extending the concepts we learned from creating a spring-based cloth simulation, we plan to design a fluid model that mimics the properties fluids like water in various containers and scenarios.</p>

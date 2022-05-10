@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>
+  body {
+    padding: 100px;
+    width: 1000px;
+    margin: auto;
+    text-align: left;
+    font-weight: 300;
+    font-family: 'Open Sans', sans-serif;
+    color: #121212;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Source Sans Pro', sans-serif;
+  }
+</style>
+<title>CS 184 Final Project</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+</head>
+
+
+<body>
+
+<h2 align="middle">UC Berkeley</h2>
+<h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2022</h1>
+<h1 align="middle">Final Project: Realistic Fluid Simulation</h1>
+    <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/high_vort.jpg" width="420px" />
+                </tr>
+            </table>
+    </div>
+<h2 align="middle">Ashvin Dhawan, CS184</h2>
+<h2 align="middle">Jacob Jiang, CS184</h2>
+<h2 align="middle">Yassin Oulad Daoud, CS184</h2>
+<h2 align="middle">Ishil Puri, CS184</h2>
+    
+<br><br>
+
+<div>
+    <h1 align="middle">Final Report</h1>
+    <h2 align="center">Abstract</h2>
+    <p>For our final project, we created a fluid simulator using the Position Based Fluids (PBF) approach in OpenCL. Fluid simulators are used in a variety of computer graphics applications like movie and video game animation; and our group was interested in understanding how to write a program to model the complex properties of fluids realistically. Working from a premade GUI, we  first implemented the algorithm published by <a href = "http://mmacklin.com/pbf_sig_preprint.pdf">Macklin and Mueller in 2013</a> to simulate water falling into an empty tank, and then altered the physics implementation to simulate other liquids. We used a 3D grid acceleration structure to improve the performance and achieved faster results generally by implementing the PBF algorithm in OpenCL.</p>
+    
+    <h2 align="center">Technical Approach</h2>
+    <h3 align="middle">Implementing the PBF algorithm</h3>
+    <p>To simulate the movement of fluids, we pursued a position-based approach by reimplementing the Macklin and Muller 2013 paper</a>. Position-based approaches use a set of positional constraints to define update rules for each fluid point mass, rather than using forces to accomplish these updates. Macklin and Muller&rsquo;s approach seeks to computationally imitate three primary fluid features:</p>
+    
+    <h3>A. Enforcing Incompressibility</h3>
+    <p>A key fluid feature is incompressibility, or the property in which density does not change with pressure. In order to incorporate this constraint, each point mass is given a density, ⍴i, defined below:</p>
+    <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/density.png" width="220px" />
+                </tr>
+            </table>
+    </div>
+    
+<p>where j is the set of neighboring particles, m is the particle&rsquo;s mass, and W is a smoothing kernel. Using the following constraints:&nbsp;</p>
+    <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/contraint.png" width="220px" />
+                </tr>
+            </table>
+    </div>
+    
+<p>this implementation enforces incompressibility by finding a position &Delta;p such that C(p+&Delta;p) = 0. We accomplish this by computing the gradient of the constraint and using Newton&rsquo;s method to find a step size along the gradient to satisfy the constraint. The calculation for this step size, &lambda;, is shown below:</p>
+    <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/lambda.png" width="220px" />
+                </tr>
+            </table>
+    </div>
+    
+<p>Once we have this step size, the final change in position is explicitly calculated in the expression shown below:</p>
+    <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/deltap.png" width="320px" />
+                </tr>
+            </table>
+    </div>
+    
+    <h3>B. Tensile Instability</h3>
+    <p>When particles have a small number of neighbors, the incompressibility constraints described above result in particles clumping together, creating an unrealistic effect. We resolve this by adding an artificial pressure term scorr to the Figure 4 equation. This results in an updated &Delta;p equation, shown below:</p>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/scorr.png" width="520px" />
+                </tr>
+            </table>
+    </div>
+    
+    
+    <h3>C. Vorticity and Viscosity</h3>
+    <p>Lastly, we implement vorticity and viscosity to improve the realism of the simulation. Position-Based fluid approaches tend to dissipate energy quickly; by adding vorticity to simulate turbulent motion, we are able to replace some of this lost energy to create a more realistic simulation. Moreover, adding viscosity, which describes the inherent thickness of a fluid, allowed us to create a variety of different simulations, from simulating water to simulating thicker, slime-like substances.&nbsp;</p>
+    <p>Macklin and Muller&rsquo;s final algorithm, implemented from their paper linked <a href="http://mmacklin.com/pbf_sig_preprint.pdf">here</a>, is shown below:</p>
+            <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/algorithm.png" width="320px" />
+                </tr>
+            </table>
+    </div>
+    
+    <p><br></p>
+   <h3 align="middle">Performance speedup and additions</h3>
+    <h3>Performance speed up with particle bins</h3>
+    <p>By default, for every particle pi, we would have to perform the above calculations between pi and every other particle pj in the tank. This O(N^2) runtime would be very inefficient as there are thousands of particles in the tank and this would all have to be computed every timestep. To speed up the performance of the algorithm, we implemented an acceleration structure whereby we split the volume of the tank into a 3D grid of bins such that the number of bins was equal to width * length * height / 4. This way, we only perform the above calculations between every particle ⍴i and the particles ⍴j in its neighboring bins, resulting in a much better runtime of O(N*log(N)).</p>
+    <p>To do this, we create a buffer to store the index of each bin from 0 to n = width * length * height / 4. Then for each timestep, we:</p>
+<ul>
+    <li>
+        <p>Place each particle into a bin based on its predicted position (position only after gravity is applied).</p>
+    </li>
+    <li>
+        <p>Compute the memory location offset of each bin by counting the number of particles in a given bin and multiplying that by the memory size of each particle position.</p>
+    </li>
+    <li>
+        <p>Repopulate the buffer storing all of the particles&rsquo; predicted positions using the memory location offsets computed above.</p>
+    </li>
+</ul>
+<p>We perform this indexing in the loop of the algorithm as described by Macklin and Mueller above where it states to &ldquo;find neighboring particles Ni&rdquo;.</p>
+    
+    <h3>Simulating metallic liquids ("Mercury")</h3>
+    <p>We wanted to see if we could make the simulated liquid behave like metallic liquids like mercury with some magnetic attraction forces. To do this, at every timestep we:</p>
+<ul>
+    <li>
+        <p>Compute the centroid of all of the particle positions to represent the center of attraction.</p>
+    </li>
+    <li>
+        <p>Offset the current velocity of each particle by a the vector point from the particle to the centroid multiplied by a small coefficient which we artificially call the &ldquo;attraction constant&rdquo;</p>
+    </li>
+</ul>
+<p>We add this calculation into the step of the algorithm in which the velocities vi are updated. This way, the particles will tend to move to contract and expand around the center of the liquid volume until energy dissipates and the simulation slows down.</p>
+    
+    <h2 align="center">Results</h2>
+    <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="gifs/default.gif" width="420px" />
+                    <figcaption align="middle">Default water simulation</figcaption>
+                </tr>
+            </table>
+    </div>
+    <p>The above demo is our default simulation for water and shows a cube of water falling into a box. As you can see, the water particles stay together initially and then spread out when they collide with the bottom of the box, with some bouncing back up slightly, demonstrating the incompressibility of water.&nbsp;</p>
+    <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="gifs/low_vort.gif" width="420px" />
+                    <figcaption align="middle">Low vorticity</figcaption>
+                    <td align="middle">
+                    <img src="gifs/high_vort.gif" width="420px" />
+                    <figcaption align="middle">High vorticity</figcaption>
+                </tr>
+            </table>
+    </div>
+    
+    <p>We experimented with the vorticity of our water simulation. Vorticity is used in our simulation to combat energy loss by introducing turbulent motion. The image on the right, with a higher vorticity value, exhibits more chaotic motion when compared to the figure on the left with lower vorticity.&nbsp;</p>
+    
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="gifs/low_visc.gif" width="420px" />
+                    <figcaption align="middle">Low viscosity</figcaption>
+                    <td align="middle">
+                    <img src="gifs/high_visc.gif" width="420px" />
+                    <figcaption align="middle">High viscosity</figcaption>
+                </tr>
+            </table>
+    </div>
+    <p>We also experimented with the viscosity values of our simulation. Viscosity is the inherent thickness of our fluid. The image on the right, with a higher viscosity, exhibits properties of a thicker fluid such as honey by bouncing up less after the collision with the bottom of the box.</p>
+    <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="gifs/slime.gif" width="420px" />
+                    <figcaption align="middle">Slime simulation</figcaption>
+                </tr>
+            </table>
+    </div>
+    <p>By experimenting with different parameters, we were able to recreate a slime-like substance, using higher viscosity and higher density values than we used for water.&nbsp;</p>
+    <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="gifs/metal.gif" width="420px" />
+                    <figcaption align="middle">"Mercury" simulation</figcaption>
+                </tr>
+            </table>
+    </div>
+    <p>We also wrote a function to simulate liquids with magnetic properties like mercury as described above in the technical approach section.&nbsp;</p>
+    
+    <h2 align="center">References</h2>
+    <h2 align="center">Team member Contributions</h2>
+
+</body>
+</html>

@@ -2,19 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <style>
-  body {
-    padding: 100px;
-    width: 1000px;
-    margin: auto;
-    text-align: left;
-    font-weight: 300;
-    font-family: 'Open Sans', sans-serif;
-    color: #121212;
-  }
-  h1, h2, h3, h4 {
-    font-family: 'Source Sans Pro', sans-serif;
-  }
+ 
 </style>
+    
+<link rel="stylesheet" href="main.css">
+<link rel="stylesheet" href="https://use.typekit.net/kao5cdj.css">
+
 <title>CS 184 Final Project</title>
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
@@ -33,12 +26,10 @@
                     <img src="images/high_vort.jpg" width="420px" />
                 </tr>
             </table>
-    </div>
-<h2 align="middle">Ashvin Dhawan, CS184</h2>
-<h2 align="middle">Jacob Jiang, CS184</h2>
-<h2 align="middle">Yassin Oulad Daoud, CS184</h2>
-<h2 align="middle">Ishil Puri, CS184</h2>
+        <div></div>
+    <h5 align="middle">Ashvin Dhawan · Jacob Jiang · Yassin Oulad Daoud · Ishil Puri</h5>
     
+    </div>
 <br><br>
 
 <div>
@@ -50,7 +41,7 @@
     <h3 align="middle">Implementing the PBF algorithm</h3>
     <p>To simulate the movement of fluids, we pursued a position-based approach by reimplementing the Macklin and Muller 2013 paper</a>. Position-based approaches use a set of positional constraints to define update rules for each fluid point mass, rather than using forces to accomplish these updates. Macklin and Muller&rsquo;s approach seeks to computationally imitate three primary fluid features:</p>
     
-    <h3>A. Enforcing Incompressibility</h3>
+    <h4>A. Enforcing Incompressibility</h4>
     <p>A key fluid feature is incompressibility, or the property in which density does not change with pressure. In order to incorporate this constraint, each point mass is given a density, ⍴i, defined below:</p>
     <div align="center">
             <table style="width=100%">
@@ -91,7 +82,7 @@
             </table>
     </div>
     
-    <h3>B. Tensile Instability</h3>
+    <h4>B. Tensile Instability</h4>
     <p>When particles have a small number of neighbors, the incompressibility constraints described above result in particles clumping together, creating an unrealistic effect. We resolve this by adding an artificial pressure term scorr to the Figure 4 equation. This results in an updated &Delta;p equation, shown below:</p>
         <div align="center">
             <table style="width=100%">
@@ -103,7 +94,7 @@
     </div>
     
     
-    <h3>C. Vorticity and Viscosity</h3>
+    <h4>C. Vorticity and Viscosity</h3>
     <p>Lastly, we implement vorticity and viscosity to improve the realism of the simulation. Position-Based fluid approaches tend to dissipate energy quickly; by adding vorticity to simulate turbulent motion, we are able to replace some of this lost energy to create a more realistic simulation. Moreover, adding viscosity, which describes the inherent thickness of a fluid, allowed us to create a variety of different simulations, from simulating water to simulating thicker, slime-like substances.&nbsp;</p>
     <p>Macklin and Muller&rsquo;s final algorithm, implemented from their paper linked <a href="http://mmacklin.com/pbf_sig_preprint.pdf">here</a>, is shown below:</p>
             <div align="center">
@@ -117,7 +108,7 @@
     
     <p><br></p>
    <h3 align="middle">Performance speedup and additions</h3>
-    <h3>Performance speed up with particle bins</h3>
+    <h4>Performance speed up with particle bins</h4>
     <p>By default, for every particle pi, we would have to perform the above calculations between pi and every other particle pj in the tank. This O(N^2) runtime would be very inefficient as there are thousands of particles in the tank and this would all have to be computed every timestep. To speed up the performance of the algorithm, we implemented an acceleration structure whereby we split the volume of the tank into a 3D grid of bins such that the number of bins was equal to width * length * height / 4. This way, we only perform the above calculations between every particle ⍴i and the particles ⍴j in its neighboring bins, resulting in a much better runtime of O(N*log(N)).</p>
     <p>To do this, we create a buffer to store the index of each bin from 0 to n = width * length * height / 4. Then for each timestep, we:</p>
 <ul>
@@ -133,7 +124,7 @@
 </ul>
 <p>We perform this indexing in the loop of the algorithm as described by Macklin and Mueller above where it states to &ldquo;find neighboring particles Ni&rdquo;.</p>
     
-    <h3>Simulating metallic liquids ("Mercury")</h3>
+    <h4>Simulating metallic liquids ("Mercury")</h4>
     <p>We wanted to see if we could make the simulated liquid behave like metallic liquids like mercury with some magnetic attraction forces. To do this, at every timestep we:</p>
 <ul>
     <li>
@@ -198,7 +189,7 @@
             <table style="width=100%">
                 <tr>
                     <td align="middle">
-                    <img src="gifs/metal.gif" width="420px" />
+                    <img style="padding-bottom: 50px; background: black;" src="gifs/metal.gif" width="420px" />
                     <figcaption align="middle">"Mercury" simulation</figcaption>
                 </tr>
             </table>
@@ -206,7 +197,33 @@
     <p>We also wrote a function to simulate liquids with magnetic properties like mercury as described above in the technical approach section.&nbsp;</p>
     
     <h2 align="center">References</h2>
-    <h2 align="center">Team member Contributions</h2>
+    <p>Conceptual help:</p>
+<ul>
+    <li>
+        <p><a href="http://mmacklin.com/pbf_sig_preprint.pdf">Miles Macklin and Matthias M&uuml;ller, &quot;Position Based Fluids,&quot; 2013.</a></p>
+    </li>
+    <li>
+        <p><a href="https://www.cs.toronto.edu/~jacobson/seminar/mueller-et-al-2007.pdf">Muller et al., &quot;Position Based Dynamics,&quot; 2006.</a></p>
+    </li>
+    <li>
+        <p><a href="http://www.cse.chalmers.se/edu/year/2018/course/TDA361/Advanced%20Computer%20Graphics/Position%20Based%20Fluids.pdf">Position Based Fluids lecture slides from CSE Chalmers.</a></p>
+    </li>
+    <li>
+        <p><a href="http://mmacklin.com/pbf_slides.pdf">Position Based Fluids slides by Macklin and M&uuml;ller.</a></p>
+    </li>
+</ul>
+<p>Code sources:</p>
+<ul>
+    <li>
+        <p><a href="https://github.com/yaoius/f2">Dillon Yao&rsquo;s Fluid Simulator (sourced GUI and OpenCL framework).</a></p>
+    </li>
+</ul>
+    
+    <h2 align="center">Team member contributions</h2>
+    <p>Yassin prepared up the initial project repository with the GUI from Dillon Yao's project and implemented the grid acceleration structure, the initial predict position function, and the functions that simulate the attraction effect of metallic liquids. He also put together the project webpages and helped debug the OpenCL code for the main PBF algorithm. </p>
+    <p>Jacob worked on implementing the calculations for &Delta;p, the change in position of the particle, using the calculation from &lambda; to determine where the particle would end up after each time step. He also worked on creating the demo gifs by experimenting with the fluid parameters and the different properties of the GUI. &nbsp;</p>
+    <p>Ashvin worked on implementing the calculations for &Delta;p, specifically on calculating the &lambda; value that Jacob then used to determine the final position. He also worked on modifying the shader code to change the fluid color, particle density, and particle size to create more realistic renderings.&nbsp;</p>
+    <p>Ishil implemented calculations for pi, which was the first step in calculating &Delta;p, particularly on calculating the density values for each of the particles and their neighbors. He also helped prepare the slides for the professor and TA presentations and created the video overview for our final project submission.</p>
 
 </body>
 </html>
